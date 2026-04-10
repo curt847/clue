@@ -4,251 +4,288 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Clue Scorekeeper</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #F7F4EF;
-    --surface: #FFFFFF;
-    --surface2: #F0EDE6;
-    --border: rgba(60,45,30,0.12);
-    --border-strong: rgba(60,45,30,0.25);
-    --text: #1C1410;
-    --text-muted: #7A6A58;
-    --text-faint: #A89880;
-    --green: #2D6A4F;
-    --green-bg: #D8EFDE;
-    --red: #8B2E2E;
-    --red-bg: #F5DEDE;
-    --amber: #7A4F10;
-    --amber-bg: #F5E6C8;
-    --blue: #1A3D6B;
-    --blue-bg: #D6E4F5;
-    --accent: #C8A96A;
-    --radius: 12px;
-    --radius-sm: 7px;
+    --bg: #1a1008;
+    --surface: #231508;
+    --card-bg: #2a1a0a;
+    --border: #5a3a1a;
+    --gold: #c9902a;
+    --gold-light: #e8b84b;
+    --gold-dim: #7a5518;
+    --cream: #f0e6c8;
+    --cream-dim: #9a8060;
+    --red: #c0392b;
+    --green: #27ae60;
+    --scarlet: #8B0000;
+    --plum: #4a1a4a;
+    --mustard: #6b5010;
+    --peacock: #0a3050;
+    --white-c: #e8e8e0;
+    --orchid: #5a1a5a;
   }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'DM Sans', sans-serif;
     background: var(--bg);
-    color: var(--text);
+    color: var(--cream);
+    font-family: 'Crimson Text', Georgia, serif;
     min-height: 100vh;
-    padding: 2rem 1rem 4rem;
-  }
-
-  .page {
-    max-width: 560px;
-    margin: 0 auto;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(90,30,10,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(30,10,60,0.3) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9902a' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 
   header {
     text-align: center;
-    margin-bottom: 2rem;
+    padding: 2.5rem 1rem 1.5rem;
+    position: relative;
   }
 
-  .logo {
+  .header-ornament {
+    color: var(--gold-dim);
+    font-size: 1.1rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    font-family: 'Crimson Text', serif;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.5px;
+    font-size: clamp(2.2rem, 7vw, 4rem);
+    font-weight: 900;
+    color: var(--gold-light);
+    text-shadow: 0 0 40px rgba(201,144,42,0.4), 0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.05em;
     line-height: 1;
-    margin-bottom: 4px;
   }
 
-  .logo span {
-    color: var(--accent);
+  .subtitle {
+    color: var(--cream-dim);
+    font-style: italic;
+    font-size: 1.05rem;
+    margin-top: 0.4rem;
   }
 
-  .tagline {
-    font-size: 13px;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
+  .divider {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    margin: 1rem auto;
   }
 
-  .sync-bar {
-    display: flex;
+  /* Sync status */
+  #sync-status {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 6px;
-    font-size: 11px;
-    padding: 5px 12px;
+    font-size: 0.78rem;
+    font-family: 'Crimson Text', serif;
+    color: var(--cream-dim);
+    margin-top: 0.5rem;
+    padding: 4px 12px;
+    border: 1px solid rgba(201,144,42,0.2);
     border-radius: 20px;
-    margin: 0 auto 1.75rem;
-    width: fit-content;
-    font-weight: 500;
-    transition: background 0.3s, color 0.3s;
+    background: rgba(0,0,0,0.3);
+    transition: all 0.3s;
   }
-
-  .sync-bar.loading { background: var(--surface2); color: var(--text-muted); }
-  .sync-bar.ok { background: var(--green-bg); color: var(--green); }
-  .sync-bar.err { background: var(--red-bg); color: var(--red); }
-  .sync-bar.saving { background: var(--amber-bg); color: var(--amber); }
-
+  #sync-status.saving { color: var(--gold); border-color: rgba(201,144,42,0.5); }
+  #sync-status.saved  { color: var(--green); border-color: rgba(39,174,96,0.4); }
+  #sync-status.error  { color: #e74c3c; border-color: rgba(231,76,60,0.4); }
   .sync-dot {
     width: 6px; height: 6px;
     border-radius: 50%;
     background: currentColor;
-    opacity: 0.7;
   }
 
+  /* Score grid */
   .scoreboard {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 1.5rem;
+    gap: 1rem;
+    max-width: 640px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
   }
 
-  .card {
-    background: var(--surface);
+  .player-card {
+    background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 12px 14px;
+    border-radius: 4px;
+    padding: 1.2rem 0.8rem 1rem;
     text-align: center;
     position: relative;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   }
 
-  .card.leader {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(200,169,106,0.15);
+  .player-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+
+  .player-card.leader {
+    border-color: var(--gold);
+    box-shadow: 0 4px 20px rgba(201,144,42,0.2), 0 0 0 1px rgba(201,144,42,0.15);
   }
 
-  .card-crown {
+  .crown {
     position: absolute;
-    top: -10px;
+    top: -14px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 16px;
+    font-size: 1.3rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
     display: none;
   }
+  .player-card.leader .crown { display: block; }
 
-  .card.leader .card-crown { display: block; }
-
-  .card-emoji { font-size: 22px; margin-bottom: 6px; }
-
-  .card-name {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
+  .player-color-bar {
+    width: 32px;
+    height: 3px;
+    border-radius: 2px;
+    margin: 0 auto 0.6rem;
   }
 
-  .card-wins {
+  .player-name {
     font-family: 'Playfair Display', serif;
-    font-size: 42px;
+    font-size: 1.15rem;
     font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-    margin-bottom: 10px;
+    color: var(--cream);
+    margin-bottom: 0.2rem;
   }
 
-  .card-last {
-    font-size: 10px;
-    color: var(--text-faint);
-    margin-bottom: 6px;
-  }
-
-  .streak-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: 20px;
-  }
-
-  .streak-badge.hot { background: var(--amber-bg); color: var(--amber); }
-  .streak-badge.cold { background: var(--blue-bg); color: var(--blue); }
-  .streak-badge.none { background: var(--surface2); color: var(--text-faint); }
-
-  .card-note {
-    font-size: 9px;
-    color: var(--text-faint);
-    font-style: italic;
-    margin-top: 5px;
-  }
-
-  .btn-row {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-bottom: 6px;
-  }
-
-  .win-btn {
-    background: var(--surface);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    padding: 8px 16px;
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    color: var(--text);
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    flex: 1;
-  }
-
-  .win-btn:hover { background: var(--surface2); }
-  .win-btn:active { transform: scale(0.97); }
-  .win-btn:disabled { opacity: 0.35; cursor: default; }
-
-  .btn-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    flex: 1;
-  }
-
-  .undo-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 4px 8px;
-    font-size: 11px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--text-faint);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    width: 100%;
-  }
-
-  .undo-btn:hover { background: var(--red-bg); color: var(--red); border-color: var(--red); }
-  .undo-btn:active { transform: scale(0.97); }
-  .undo-btn:disabled { opacity: 0.25; cursor: default; }
-
-  .mickey-note {
-    font-size: 11px;
-    color: var(--text-faint);
-    text-align: center;
-    font-style: italic;
-    margin-bottom: 1.75rem;
-  }
-
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 0 0 1.25rem;
-  }
-
-  .section-label {
-    font-size: 11px;
-    font-weight: 500;
+  .player-subtitle {
+    font-size: 0.72rem;
+    color: var(--cream-dim);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--text-muted);
-    margin-bottom: 10px;
+    margin-bottom: 0.8rem;
   }
+
+  .score {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+    transition: transform 0.15s;
+  }
+
+  .score.bump { animation: scoreBump 0.25s ease; }
+  @keyframes scoreBump {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+
+  .last-win {
+    font-size: 0.7rem;
+    color: var(--cream-dim);
+    font-style: italic;
+    min-height: 1em;
+    margin-bottom: 0.8rem;
+  }
+
+  .btn-win {
+    width: 100%;
+    padding: 0.55rem 0;
+    font-family: 'Crimson Text', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border: 1px solid;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 0.4rem;
+  }
+
+  .btn-undo {
+    width: 100%;
+    padding: 0.3rem 0;
+    font-family: 'Crimson Text', serif;
+    font-size: 0.75rem;
+    color: var(--cream-dim);
+    background: transparent;
+    border: 1px solid rgba(90,58,26,0.5);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-undo:hover:not(:disabled) { color: var(--cream); border-color: var(--border); }
+  .btn-undo:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Player colors */
+  .card-curt   .player-color-bar { background: #c9902a; }
+  .card-curt   .score            { color: #e8b84b; }
+  .card-curt   .btn-win          { background: rgba(201,144,42,0.15); border-color: #c9902a; color: #e8b84b; }
+  .card-curt   .btn-win:hover    { background: rgba(201,144,42,0.3); }
+
+  .card-heather .player-color-bar { background: #9b2335; }
+  .card-heather .score            { color: #d44; }
+  .card-heather .btn-win          { background: rgba(155,35,53,0.15); border-color: #9b2335; color: #e05; }
+  .card-heather .btn-win:hover    { background: rgba(155,35,53,0.3); }
+
+  .card-mickey .player-color-bar { background: #555; }
+  .card-mickey .score            { color: #aaa; }
+  .card-mickey .btn-win          { background: rgba(80,80,80,0.2); border-color: #555; color: #bbb; }
+  .card-mickey .btn-win:hover    { background: rgba(80,80,80,0.35); }
+
+  /* Total bar */
+  .total-bar {
+    max-width: 640px;
+    margin: 0 auto 1.5rem;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    font-size: 0.8rem;
+    color: var(--cream-dim);
+    font-style: italic;
+  }
+
+  /* History */
+  .history-section {
+    max-width: 640px;
+    margin: 0 auto 2rem;
+    padding: 0 1rem;
+  }
+
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .history-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .btn-clear-all {
+    font-family: 'Crimson Text', serif;
+    font-size: 0.75rem;
+    color: var(--cream-dim);
+    background: transparent;
+    border: 1px solid rgba(90,58,26,0.4);
+    padding: 3px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-clear-all:hover { color: #e74c3c; border-color: rgba(231,76,60,0.4); }
 
   .history-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    max-height: 200px;
+    max-height: 220px;
     overflow-y: auto;
   }
 
@@ -256,275 +293,295 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
     padding: 6px 10px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text-muted);
+    background: rgba(0,0,0,0.25);
+    border-radius: 3px;
+    font-size: 0.82rem;
+    border-left: 2px solid var(--border);
   }
 
-  .history-winner {
-    font-weight: 500;
-    color: var(--text);
-  }
+  .history-item .hw { font-weight: 600; }
+  .hw-curt    { color: #e8b84b; }
+  .hw-heather { color: #e05; }
+  .hw-mickey  { color: #aaa; }
 
-  .history-disputed {
-    font-size: 10px;
-    color: var(--text-faint);
-    font-style: italic;
-    margin-left: 5px;
-  }
+  .history-time { color: var(--cream-dim); font-style: italic; font-size: 0.72rem; }
 
-  .no-history {
-    font-size: 12px;
-    color: var(--text-faint);
-    font-style: italic;
+  .empty-history {
     text-align: center;
-    padding: 1rem 0;
+    color: var(--cream-dim);
+    font-style: italic;
+    font-size: 0.85rem;
+    padding: 1.5rem 0;
   }
 
-  .footer {
-    display: flex;
-    justify-content: center;
-    margin-top: 1.5rem;
+  /* Mickey disclaimer */
+  .mickey-note {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--cream-dim);
+    font-style: italic;
+    padding: 0 1rem 1.5rem;
+    opacity: 0.6;
   }
 
-  .reset-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 6px 16px;
-    font-size: 12px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--text-faint);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+  /* Tie toast */
+  #toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(30,15,5,0.95);
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+    padding: 0.7rem 1.5rem;
+    border-radius: 4px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    transition: transform 0.3s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
   }
-
-  .reset-btn:hover { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+  #toast.show { transform: translateX(-50%) translateY(0); }
 
   @media (max-width: 400px) {
-    .card-wins { font-size: 34px; }
-    .win-btn { font-size: 12px; padding: 7px 10px; }
+    .scoreboard { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; padding: 0 0.5rem; }
+    .player-card { padding: 1rem 0.5rem 0.8rem; }
+    .score { font-size: 2.2rem; }
+    .player-name { font-size: 1rem; }
+    .btn-win { font-size: 0.85rem; }
   }
 </style>
 </head>
 <body>
-<div class="page">
-  <header>
-    <div class="logo">Clue<span>.</span></div>
-    <div class="tagline">Curt &middot; Heather &middot; Mickey</div>
-  </header>
 
-  <div class="sync-bar loading" id="sync-bar">
-    <div class="sync-dot"></div>
-    <span id="sync-text">Connecting to Drive...</span>
+<header>
+  <div class="header-ornament">⚜ The Study ⚜</div>
+  <h1>Clue</h1>
+  <div class="subtitle">A Record of Accusations &amp; Verdicts</div>
+  <div class="divider"></div>
+  <div id="sync-status">
+    <span class="sync-dot"></span>
+    <span id="sync-text">Loading scores…</span>
   </div>
+</header>
 
-  <div class="scoreboard" id="scoreboard"></div>
-
-  <div class="btn-row">
-    <div class="btn-group">
-      <button class="win-btn" id="btn-Curt" onclick="recordWin('Curt')" disabled>+ Curt</button>
-      <button class="undo-btn" id="undo-Curt" onclick="undoWin('Curt')" disabled>− undo</button>
-    </div>
-    <div class="btn-group">
-      <button class="win-btn" id="btn-Heather" onclick="recordWin('Heather')" disabled>+ Heather</button>
-      <button class="undo-btn" id="undo-Heather" onclick="undoWin('Heather')" disabled>− undo</button>
-    </div>
-    <div class="btn-group">
-      <button class="win-btn" id="btn-Mickey" onclick="recordWin('Mickey')" disabled>+ Mickey</button>
-      <button class="undo-btn" id="undo-Mickey" onclick="undoWin('Mickey')" disabled>− undo</button>
-    </div>
-  </div>
-  <p class="mickey-note">&#42; Mickey wins are of disputed legitimacy.</p>
-
-  <hr class="divider">
-  <div class="section-label">Recent games</div>
-  <div class="history-list" id="history-list"></div>
-
-  <div class="footer">
-    <button class="reset-btn" onclick="resetScores()">Reset all scores</button>
-  </div>
+<div class="scoreboard" id="scoreboard">
+  <!-- Cards injected by JS -->
 </div>
 
+<div class="total-bar" id="total-bar"></div>
+
+<div class="history-section">
+  <div class="history-header">
+    <span class="history-title">Case Files</span>
+    <button class="btn-clear-all" onclick="confirmReset()">Reset All</button>
+  </div>
+  <div class="history-list" id="history-list"></div>
+</div>
+
+<p class="mickey-note">* Mickey wins named after the Lakers' 2020 NBA bubble championship — legitimacy disputed.</p>
+
+<div id="toast"></div>
+
 <script>
-const PLAYERS = ['Curt', 'Heather', 'Mickey'];
-const EMOJIS = { Curt: '🕵️', Heather: '🔍', Mickey: '🐭' };
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhrlXehTI7F7bxKncGhI-cJkeANyGbIOzmfDli3wiGd0SnlrdKyiMLlYBrY9-Z_00ZHg/exec';
+const STORAGE_KEY = 'CLUE_SCORES_V2';
 
-const READ_URL  = 'https://script.google.com/macros/s/AKfycbx6bii9j6bTsTQCK4QT5-zF4XGVRygiYdqExdb0QbFQJqu__l-gLjBr8gRUyGpZzAziow/exec';
-const WRITE_URL = 'https://script.google.com/macros/s/AKfycbxhrlXehTI7F7bxKncGhI-cJkeANyGbIOzmfDli3wiGd0SnlrdKyiMLlYBrY9-Z_00ZHg/exec';
-const TAG_OPEN  = '%%CLUE_SCORES_START%%';
-const TAG_CLOSE = '%%CLUE_SCORES_END%%';
-const LS_KEY    = 'clue_scores_v3';
+const PLAYERS = [
+  { id: 'curt',    name: 'Curt',    subtitle: 'The Detective',    cardClass: 'card-curt'    },
+  { id: 'heather', name: 'Heather', subtitle: 'The Suspect',      cardClass: 'card-heather' },
+  { id: 'mickey',  name: 'Mickey*', subtitle: 'The Computer',     cardClass: 'card-mickey'  },
+];
 
-const DEFAULT = {
-  wins: { Curt: 9, Heather: 8, Mickey: 9 },
-  lastWin: { Curt: null, Heather: null, Mickey: null },
-  history: []
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let state = {
+  wins: { curt: 0, heather: 0, mickey: 0 },
+  history: []   // { player, ts }
 };
 
-let state = JSON.parse(JSON.stringify(DEFAULT));
-let saving = false;
-
-function setSync(msg, cls) {
-  const bar = document.getElementById('sync-bar');
-  bar.className = 'sync-bar ' + cls;
-  document.getElementById('sync-text').textContent = msg;
-}
-
-function enableBtns(on) {
-  PLAYERS.forEach(p => {
-    document.getElementById('btn-' + p).disabled = !on;
-    const undoBtn = document.getElementById('undo-' + p);
-    undoBtn.disabled = !on || (state.wins[p] <= 0);
-  });
+// ─── DRIVE SYNC ───────────────────────────────────────────────────────────────
+function setSyncStatus(mode, text) {
+  const el = document.getElementById('sync-status');
+  const tx = document.getElementById('sync-text');
+  el.className = mode;
+  tx.textContent = text;
 }
 
 async function loadFromDrive() {
+  setSyncStatus('saving', 'Loading from Drive…');
   try {
-    const res = await fetch(READ_URL, { cache: 'no-store' });
+    const url = SCRIPT_URL + '?mode=read&key=' + STORAGE_KEY;
+    const res = await fetch(url);
     const text = await res.text();
-    const start = text.indexOf(TAG_OPEN);
-    const end   = text.indexOf(TAG_CLOSE);
-    if (start !== -1 && end !== -1) {
-      const json = text.slice(start + TAG_OPEN.length, end).trim();
-      state = JSON.parse(json);
-      localStorage.setItem(LS_KEY, JSON.stringify(state));
-      setSync('Synced with Drive', 'ok');
-    } else {
-      const local = localStorage.getItem(LS_KEY);
-      if (local) { state = JSON.parse(local); setSync('Loaded from local cache', 'ok'); }
-      else setSync('No data yet — starting fresh', 'ok');
+    // The Apps Script returns the content appended; we look for our JSON marker
+    const match = text.match(/CLUE_DATA_START([\s\S]*?)CLUE_DATA_END/);
+    if (match) {
+      const parsed = JSON.parse(match[1].trim());
+      if (parsed && parsed.wins) {
+        state = parsed;
+        setSyncStatus('saved', 'Loaded from Drive');
+        return true;
+      }
     }
+    // Fallback: maybe the whole response is our JSON
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed && parsed.wins) {
+        state = parsed;
+        setSyncStatus('saved', 'Loaded from Drive');
+        return true;
+      }
+    } catch(e) {}
+    setSyncStatus('', 'No Drive data — starting fresh');
+    return false;
   } catch(e) {
-    const local = localStorage.getItem(LS_KEY);
-    if (local) { try { state = JSON.parse(local); } catch(e2) {} }
-    setSync('Drive unavailable — using local cache', 'err');
+    setSyncStatus('error', 'Drive unavailable — using local');
+    return false;
   }
-  enableBtns(true);
-  render();
 }
 
 async function saveToDrive() {
-  if (saving) return;
-  saving = true;
-  setSync('Saving...', 'saving');
-  localStorage.setItem(LS_KEY, JSON.stringify(state));
-  const payload = TAG_OPEN + JSON.stringify(state) + TAG_CLOSE;
+  setSyncStatus('saving', 'Saving to Drive…');
+  const payload = 'CLUE_DATA_START' + JSON.stringify(state) + 'CLUE_DATA_END';
+  const encoded = encodeURIComponent(payload);
   try {
-    const url = WRITE_URL + '?content=' + encodeURIComponent(payload) + '&mode=overwrite';
-    await fetch(url, { cache: 'no-store' });
-    setSync('Saved to Drive', 'ok');
+    const url = SCRIPT_URL + '?content=' + encoded + '&mode=overwrite&key=' + STORAGE_KEY;
+    await fetch(url);
+    setSyncStatus('saved', 'Saved · ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
-    setSync('Drive save failed — stored locally', 'err');
+    setSyncStatus('error', 'Save failed — stored locally');
   }
-  saving = false;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function formatDate(iso) {
-  if (!iso) return 'Never';
-  const d = new Date(iso), now = new Date();
-  const days = Math.floor((now - d) / 86400000);
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  if (days < 7) return days + 'd ago';
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function loadFromLocal() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.wins) { state = parsed; return true; }
+    }
+  } catch(e) {}
+  return false;
 }
 
-function streakLabel(player) {
-  const games = [...(state.history || [])].reverse();
-  if (!games.length) return { label: 'No games yet', cls: 'none' };
-  let cur = null, count = 0;
-  for (const g of games) {
-    if (!cur) cur = g.winner;
-    if (g.winner === cur) count++;
-    else break;
-  }
-  if (cur === player) return { label: count === 1 ? 'Won last game' : count + '-game streak', cls: 'hot' };
-  let loss = 0;
-  for (const g of games) { if (g.winner !== player) loss++; else break; }
-  return loss === 0
-    ? { label: 'No games yet', cls: 'none' }
-    : { label: loss === 1 ? 'Lost last game' : loss + ' games without a win', cls: 'cold' };
-}
-
+// ─── RENDER ───────────────────────────────────────────────────────────────────
 function getLeaders() {
-  const max = Math.max(...PLAYERS.map(p => state.wins[p]));
-  return PLAYERS.filter(p => state.wins[p] === max);
+  const max = Math.max(...Object.values(state.wins));
+  if (max === 0) return [];
+  return Object.keys(state.wins).filter(p => state.wins[p] === max);
+}
+
+function fmtTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleDateString([], {month:'short', day:'numeric'}) + ' ' +
+         d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+
+function lastWinFor(playerId) {
+  const entries = [...(state.history || [])].reverse().filter(h => h.player === playerId);
+  return entries.length ? entries[0].ts : null;
 }
 
 function render() {
   const leaders = getLeaders();
-  document.getElementById('scoreboard').innerHTML = PLAYERS.map(p => {    const sl = streakLabel(p);
-    const isLeader = leaders.includes(p);
-    return `<div class="card${isLeader ? ' leader' : ''}">
-      <div class="card-crown">👑</div>
-      <div class="card-emoji">${EMOJIS[p]}</div>
-      <div class="card-name">${p}</div>
-      <div class="card-wins">${state.wins[p]}</div>
-      <div class="card-last">Last win: ${formatDate(state.lastWin[p])}</div>
-      <span class="streak-badge ${sl.cls}">${sl.label}</span>
-      ${p === 'Mickey' ? '<div class="card-note">&#42;bubble championship</div>' : ''}
-    </div>`;
+  const board = document.getElementById('scoreboard');
+  board.innerHTML = PLAYERS.map(p => {
+    const wins = state.wins[p.id] || 0;
+    const isLeader = leaders.includes(p.id);
+    const lw = lastWinFor(p.id);
+    return `
+      <div class="player-card ${p.cardClass}${isLeader ? ' leader' : ''}">
+        <div class="crown">♛</div>
+        <div class="player-color-bar"></div>
+        <div class="player-name">${p.name}</div>
+        <div class="player-subtitle">${p.subtitle}</div>
+        <div class="score" id="score-${p.id}">${wins}</div>
+        <div class="last-win">${lw ? 'Last: ' + fmtTime(lw) : '—'}</div>
+        <button class="btn-win" onclick="recordWin('${p.id}')">+ Victory</button>
+        <button class="btn-undo" id="undo-${p.id}" onclick="undoWin('${p.id}')" ${wins === 0 ? 'disabled' : ''}>↩ undo</button>
+      </div>`;
   }).join('');
 
+  // History
   const hl = document.getElementById('history-list');
-  const hist = state.history || [];
+  const hist = [...(state.history || [])].reverse();
   if (!hist.length) {
-    hl.innerHTML = '<div class="no-history">No games recorded yet</div>';
+    hl.innerHTML = '<div class="empty-history">No games recorded yet.</div>';
   } else {
-    hl.innerHTML = [...hist].reverse().slice(0, 25).map(h => {
-      const d = new Date(h.iso);
-      const time = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' +
-        d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      const disputed = h.winner === 'Mickey' ? '<span class="history-disputed">(disputed)</span>' : '';
+    hl.innerHTML = hist.map((h, i) => {
+      const p = PLAYERS.find(x => x.id === h.player);
+      const label = p ? p.name : h.player;
+      const cls = 'hw-' + h.player;
       return `<div class="history-item">
-        <span><span class="history-winner">${h.winner}</span>${disputed}</span>
-        <span>${time}</span>
+        <span><span class="hw ${cls}">${label}</span> solved the case</span>
+        <span class="history-time">${fmtTime(h.ts)}</span>
       </div>`;
     }).join('');
   }
 
-  PLAYERS.forEach(p => {
-    const ub = document.getElementById('undo-' + p);
-    if (ub) ub.disabled = state.wins[p] <= 0;
-  });
+  // Total bar
+  const total = Object.values(state.wins).reduce((a,b) => a+b, 0);
+  document.getElementById('total-bar').textContent =
+    total === 0 ? '' : total + ' game' + (total !== 1 ? 's' : '') + ' played';
 }
 
-function recordWin(player) {
-  state.wins[player]++;
-  const iso = new Date().toISOString();
-  state.lastWin[player] = iso;
+// ─── ACTIONS ──────────────────────────────────────────────────────────────────
+function recordWin(playerId) {
+  if (!state.wins) state.wins = {};
   if (!state.history) state.history = [];
-  state.history.push({ winner: player, iso });
+  state.wins[playerId] = (state.wins[playerId] || 0) + 1;
+  state.history.push({ player: playerId, ts: new Date().toISOString() });
+  render();
+  // Bump animation
+  const el = document.getElementById('score-' + playerId);
+  if (el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+  // Leader check
+  const leaders = getLeaders();
+  if (leaders.length > 1) showToast('A tie! The case remains open…');
+  saveToDrive();
+}
+
+function undoWin(playerId) {
+  if (!state.wins[playerId] || state.wins[playerId] <= 0) return;
+  state.wins[playerId]--;
+  // Remove last history entry for this player
+  const idx = [...state.history].map((h,i)=>({...h,i})).reverse().find(h => h.player === playerId);
+  if (idx !== undefined) state.history.splice(idx.i, 1);
   render();
   saveToDrive();
 }
 
-function undoWin(player) {
-  if (state.wins[player] <= 0) return;
-  state.wins[player]--;
-  if (!state.history) state.history = [];
-  const idx = [...state.history].map(h => h.winner).lastIndexOf(player);
-  if (idx !== -1) state.history.splice(idx, 1);
-  const lastGame = [...state.history].reverse().find(h => h.winner === player);
-  state.lastWin[player] = lastGame ? lastGame.iso : null;
-  render();
-  saveToDrive();
-}
-
-function resetScores() {
-  if (confirm('Reset all scores and history to zero?')) {
-    state = JSON.parse(JSON.stringify(DEFAULT));
-    state.wins = { Curt: 0, Heather: 0, Mickey: 0 };
+function confirmReset() {
+  if (confirm('Reset ALL scores and history? This cannot be undone.')) {
+    state = { wins: { curt: 0, heather: 0, mickey: 0 }, history: [] };
     render();
     saveToDrive();
   }
 }
 
-loadFromDrive();
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+async function init() {
+  // Load local first for instant render
+  loadFromLocal();
+  render();
+  // Then try Drive (overwrites if found)
+  await loadFromDrive();
+  render();
+}
+
+init();
 </script>
 </body>
 </html>
