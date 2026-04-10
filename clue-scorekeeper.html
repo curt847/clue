@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clue Scorekeeper</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F4EF;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --border: rgba(60,45,30,0.12);
+    --border-strong: rgba(60,45,30,0.25);
+    --text: #1C1410;
+    --text-muted: #7A6A58;
+    --text-faint: #A89880;
+    --green: #2D6A4F;
+    --green-bg: #D8EFDE;
+    --red: #8B2E2E;
+    --red-bg: #F5DEDE;
+    --amber: #7A4F10;
+    --amber-bg: #F5E6C8;
+    --blue: #1A3D6B;
+    --blue-bg: #D6E4F5;
+    --accent: #C8A96A;
+    --radius: 12px;
+    --radius-sm: 7px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .logo span {
+    color: var(--accent);
+  }
+
+  .tagline {
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+  }
+
+  .sync-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin: 0 auto 1.75rem;
+    width: fit-content;
+    font-weight: 500;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .sync-bar.loading { background: var(--surface2); color: var(--text-muted); }
+  .sync-bar.ok { background: var(--green-bg); color: var(--green); }
+  .sync-bar.err { background: var(--red-bg); color: var(--red); }
+  .sync-bar.saving { background: var(--amber-bg); color: var(--amber); }
+
+  .sync-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+  }
+
+  .scoreboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 12px 14px;
+    text-align: center;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .card.leader {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(200,169,106,0.15);
+  }
+
+  .card-crown {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    display: none;
+  }
+
+  .card.leader .card-crown { display: block; }
+
+  .card-emoji { font-size: 22px; margin-bottom: 6px; }
+
+  .card-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+
+  .card-wins {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .card-last {
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+
+  .streak-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .streak-badge.hot { background: var(--amber-bg); color: var(--amber); }
+  .streak-badge.cold { background: var(--blue-bg); color: var(--blue); }
+  .streak-badge.none { background: var(--surface2); color: var(--text-faint); }
+
+  .card-note {
+    font-size: 9px;
+    color: var(--text-faint);
+    font-style: italic;
+    margin-top: 5px;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+
+  .win-btn {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    flex: 1;
+  }
+
+  .win-btn:hover { background: var(--surface2); }
+  .win-btn:active { transform: scale(0.97); }
+  .win-btn:disabled { opacity: 0.35; cursor: default; }
+
+  .mickey-note {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+    font-style: italic;
+    margin-bottom: 1.75rem;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 1.25rem;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+  }
+
+  .history-winner {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .history-disputed {
+    font-size: 10px;
+    color: var(--text-faint);
+    font-style: italic;
+    margin-left: 5px;
+  }
+
+  .no-history {
+    font-size: 12px;
+    color: var(--text-faint);
+    font-style: italic;
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  .footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 16px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-faint);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .reset-btn:hover { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+
+  @media (max-width: 400px) {
+    .card-wins { font-size: 34px; }
+    .win-btn { font-size: 12px; padding: 7px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="logo">Clue<span>.</span></div>
+    <div class="tagline">Curt &middot; Heather &middot; Mickey</div>
+  </header>
+
+  <div class="sync-bar loading" id="sync-bar">
+    <div class="sync-dot"></div>
+    <span id="sync-text">Connecting to Drive...</span>
+  </div>
+
+  <div class="scoreboard" id="scoreboard"></div>
+
+  <div class="btn-row">
+    <button class="win-btn" id="btn-Curt" onclick="recordWin('Curt')" disabled>+ Curt</button>
+    <button class="win-btn" id="btn-Heather" onclick="recordWin('Heather')" disabled>+ Heather</button>
+    <button class="win-btn" id="btn-Mickey" onclick="recordWin('Mickey')" disabled>+ Mickey</button>
+  </div>
+  <p class="mickey-note">&#42; Mickey wins are of disputed legitimacy.</p>
+
+  <hr class="divider">
+  <div class="section-label">Recent games</div>
+  <div class="history-list" id="history-list"></div>
+
+  <div class="footer">
+    <button class="reset-btn" onclick="resetScores()">Reset all scores</button>
+  </div>
+</div>
+
+<script>
+const PLAYERS = ['Curt', 'Heather', 'Mickey'];
+const EMOJIS = { Curt: '🕵️', Heather: '🔍', Mickey: '🐭' };
+
+const READ_URL  = 'https://script.google.com/macros/s/AKfycbx6bii9j6bTsTQCK4QT5-zF4XGVRygiYdqExdb0QbFQJqu__l-gLjBr8gRUyGpZzAziow/exec';
+const WRITE_URL = 'https://script.google.com/macros/s/AKfycbxhrlXehTI7F7bxKncGhI-cJkeANyGbIOzmfDli3wiGd0SnlrdKyiMLlYBrY9-Z_00ZHg/exec';
+const TAG_OPEN  = '%%CLUE_SCORES_START%%';
+const TAG_CLOSE = '%%CLUE_SCORES_END%%';
+const LS_KEY    = 'clue_scores_v3';
+
+const DEFAULT = {
+  wins: { Curt: 9, Heather: 8, Mickey: 9 },
+  lastWin: { Curt: null, Heather: null, Mickey: null },
+  history: []
+};
+
+let state = JSON.parse(JSON.stringify(DEFAULT));
+let saving = false;
+
+function setSync(msg, cls) {
+  const bar = document.getElementById('sync-bar');
+  bar.className = 'sync-bar ' + cls;
+  document.getElementById('sync-text').textContent = msg;
+}
+
+function enableBtns(on) {
+  PLAYERS.forEach(p => { document.getElementById('btn-' + p).disabled = !on; });
+}
+
+async function loadFromDrive() {
+  try {
+    const res = await fetch(READ_URL, { cache: 'no-store' });
+    const text = await res.text();
+    const start = text.indexOf(TAG_OPEN);
+    const end   = text.indexOf(TAG_CLOSE);
+    if (start !== -1 && end !== -1) {
+      const json = text.slice(start + TAG_OPEN.length, end).trim();
+      state = JSON.parse(json);
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+      setSync('Synced with Drive', 'ok');
+    } else {
+      const local = localStorage.getItem(LS_KEY);
+      if (local) { state = JSON.parse(local); setSync('Loaded from local cache', 'ok'); }
+      else setSync('No data yet — starting fresh', 'ok');
+    }
+  } catch(e) {
+    const local = localStorage.getItem(LS_KEY);
+    if (local) { try { state = JSON.parse(local); } catch(e2) {} }
+    setSync('Drive unavailable — using local cache', 'err');
+  }
+  enableBtns(true);
+  render();
+}
+
+async function saveToDrive() {
+  if (saving) return;
+  saving = true;
+  setSync('Saving...', 'saving');
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+  const payload = TAG_OPEN + JSON.stringify(state) + TAG_CLOSE;
+  try {
+    const url = WRITE_URL + '?content=' + encodeURIComponent(payload) + '&mode=overwrite';
+    await fetch(url, { cache: 'no-store' });
+    setSync('Saved to Drive', 'ok');
+  } catch(e) {
+    setSync('Drive save failed — stored locally', 'err');
+  }
+  saving = false;
+}
+
+function formatDate(iso) {
+  if (!iso) return 'Never';
+  const d = new Date(iso), now = new Date();
+  const days = Math.floor((now - d) / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return days + 'd ago';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function streakLabel(player) {
+  const games = [...(state.history || [])].reverse();
+  if (!games.length) return { label: 'No games yet', cls: 'none' };
+  let cur = null, count = 0;
+  for (const g of games) {
+    if (!cur) cur = g.winner;
+    if (g.winner === cur) count++;
+    else break;
+  }
+  if (cur === player) return { label: count === 1 ? 'Won last game' : count + '-game streak', cls: 'hot' };
+  let loss = 0;
+  for (const g of games) { if (g.winner !== player) loss++; else break; }
+  return loss === 0
+    ? { label: 'No games yet', cls: 'none' }
+    : { label: loss === 1 ? 'Lost last game' : loss + ' games without a win', cls: 'cold' };
+}
+
+function getLeaders() {
+  const max = Math.max(...PLAYERS.map(p => state.wins[p]));
+  return PLAYERS.filter(p => state.wins[p] === max);
+}
+
+function render() {
+  const leaders = getLeaders();
+  document.getElementById('scoreboard').innerHTML = PLAYERS.map(p => {
+    const sl = streakLabel(p);
+    const isLeader = leaders.includes(p);
+    return `<div class="card${isLeader ? ' leader' : ''}">
+      <div class="card-crown">👑</div>
+      <div class="card-emoji">${EMOJIS[p]}</div>
+      <div class="card-name">${p}</div>
+      <div class="card-wins">${state.wins[p]}</div>
+      <div class="card-last">Last win: ${formatDate(state.lastWin[p])}</div>
+      <span class="streak-badge ${sl.cls}">${sl.label}</span>
+      ${p === 'Mickey' ? '<div class="card-note">&#42;bubble championship</div>' : ''}
+    </div>`;
+  }).join('');
+
+  const hl = document.getElementById('history-list');
+  const hist = state.history || [];
+  if (!hist.length) {
+    hl.innerHTML = '<div class="no-history">No games recorded yet</div>';
+  } else {
+    hl.innerHTML = [...hist].reverse().slice(0, 25).map(h => {
+      const d = new Date(h.iso);
+      const time = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' +
+        d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const disputed = h.winner === 'Mickey' ? '<span class="history-disputed">(disputed)</span>' : '';
+      return `<div class="history-item">
+        <span><span class="history-winner">${h.winner}</span>${disputed}</span>
+        <span>${time}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+function recordWin(player) {
+  state.wins[player]++;
+  const iso = new Date().toISOString();
+  state.lastWin[player] = iso;
+  if (!state.history) state.history = [];
+  state.history.push({ winner: player, iso });
+  render();
+  saveToDrive();
+}
+
+function resetScores() {
+  if (confirm('Reset all scores and history to zero?')) {
+    state = JSON.parse(JSON.stringify(DEFAULT));
+    state.wins = { Curt: 0, Heather: 0, Mickey: 0 };
+    render();
+    saveToDrive();
+  }
+}
+
+loadFromDrive();
+</script>
+</body>
+</html>
