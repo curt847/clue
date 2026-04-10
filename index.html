@@ -197,6 +197,30 @@
   .win-btn:active { transform: scale(0.97); }
   .win-btn:disabled { opacity: 0.35; cursor: default; }
 
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+  }
+
+  .undo-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-faint);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    width: 100%;
+  }
+
+  .undo-btn:hover { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+  .undo-btn:active { transform: scale(0.97); }
+  .undo-btn:disabled { opacity: 0.25; cursor: default; }
+
   .mickey-note {
     font-size: 11px;
     color: var(--text-faint);
@@ -301,9 +325,18 @@
   <div class="scoreboard" id="scoreboard"></div>
 
   <div class="btn-row">
-    <button class="win-btn" id="btn-Curt" onclick="recordWin('Curt')" disabled>+ Curt</button>
-    <button class="win-btn" id="btn-Heather" onclick="recordWin('Heather')" disabled>+ Heather</button>
-    <button class="win-btn" id="btn-Mickey" onclick="recordWin('Mickey')" disabled>+ Mickey</button>
+    <div class="btn-group">
+      <button class="win-btn" id="btn-Curt" onclick="recordWin('Curt')" disabled>+ Curt</button>
+      <button class="undo-btn" id="undo-Curt" onclick="undoWin('Curt')" disabled>− undo</button>
+    </div>
+    <div class="btn-group">
+      <button class="win-btn" id="btn-Heather" onclick="recordWin('Heather')" disabled>+ Heather</button>
+      <button class="undo-btn" id="undo-Heather" onclick="undoWin('Heather')" disabled>− undo</button>
+    </div>
+    <div class="btn-group">
+      <button class="win-btn" id="btn-Mickey" onclick="recordWin('Mickey')" disabled>+ Mickey</button>
+      <button class="undo-btn" id="undo-Mickey" onclick="undoWin('Mickey')" disabled>− undo</button>
+    </div>
   </div>
   <p class="mickey-note">&#42; Mickey wins are of disputed legitimacy.</p>
 
@@ -342,7 +375,11 @@ function setSync(msg, cls) {
 }
 
 function enableBtns(on) {
-  PLAYERS.forEach(p => { document.getElementById('btn-' + p).disabled = !on; });
+  PLAYERS.forEach(p => {
+    document.getElementById('btn-' + p).disabled = !on;
+    const undoBtn = document.getElementById('undo-' + p);
+    undoBtn.disabled = !on || (state.wins[p] <= 0);
+  });
 }
 
 async function loadFromDrive() {
@@ -420,8 +457,7 @@ function getLeaders() {
 
 function render() {
   const leaders = getLeaders();
-  document.getElementById('scoreboard').innerHTML = PLAYERS.map(p => {
-    const sl = streakLabel(p);
+  document.getElementById('scoreboard').innerHTML = PLAYERS.map(p => {    const sl = streakLabel(p);
     const isLeader = leaders.includes(p);
     return `<div class="card${isLeader ? ' leader' : ''}">
       <div class="card-crown">👑</div>
@@ -450,6 +486,11 @@ function render() {
       </div>`;
     }).join('');
   }
+
+  PLAYERS.forEach(p => {
+    const ub = document.getElementById('undo-' + p);
+    if (ub) ub.disabled = state.wins[p] <= 0;
+  });
 }
 
 function recordWin(player) {
@@ -458,6 +499,18 @@ function recordWin(player) {
   state.lastWin[player] = iso;
   if (!state.history) state.history = [];
   state.history.push({ winner: player, iso });
+  render();
+  saveToDrive();
+}
+
+function undoWin(player) {
+  if (state.wins[player] <= 0) return;
+  state.wins[player]--;
+  if (!state.history) state.history = [];
+  const idx = [...state.history].map(h => h.winner).lastIndexOf(player);
+  if (idx !== -1) state.history.splice(idx, 1);
+  const lastGame = [...state.history].reverse().find(h => h.winner === player);
+  state.lastWin[player] = lastGame ? lastGame.iso : null;
   render();
   saveToDrive();
 }
