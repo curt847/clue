@@ -387,7 +387,7 @@
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhrlXehTI7F7bxKncGhI-cJkeANyGbIOzmfDli3wiGd0SnlrdKyiMLlYBrY9-Z_00ZHg/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6bii9j6bTsTQCK4QT5-zF4XGVRygiYdqExdb0QbFQJqu__l-gLjBr8gRUyGpZzAziow/exec';
 const STORAGE_KEY = 'CLUE_SCORES_V2';
 
 const PLAYERS = [
@@ -413,28 +413,13 @@ function setSyncStatus(mode, text) {
 async function loadFromDrive() {
   setSyncStatus('saving', 'Loading from Drive…');
   try {
-    const url = SCRIPT_URL + '?mode=read&key=' + STORAGE_KEY;
-    const res = await fetch(url);
-    const text = await res.text();
-    // The Apps Script returns the content appended; we look for our JSON marker
-    const match = text.match(/CLUE_DATA_START([\s\S]*?)CLUE_DATA_END/);
-    if (match) {
-      const parsed = JSON.parse(match[1].trim());
-      if (parsed && parsed.wins) {
-        state = parsed;
-        setSyncStatus('saved', 'Loaded from Drive');
-        return true;
-      }
+    const res = await fetch(SCRIPT_URL + '?action=clueRead');
+    const parsed = await res.json();
+    if (parsed && parsed.wins) {
+      state = parsed;
+      setSyncStatus('saved', 'Loaded from Drive');
+      return true;
     }
-    // Fallback: maybe the whole response is our JSON
-    try {
-      const parsed = JSON.parse(text);
-      if (parsed && parsed.wins) {
-        state = parsed;
-        setSyncStatus('saved', 'Loaded from Drive');
-        return true;
-      }
-    } catch(e) {}
     setSyncStatus('', 'No Drive data — starting fresh');
     return false;
   } catch(e) {
@@ -445,14 +430,12 @@ async function loadFromDrive() {
 
 async function saveToDrive() {
   setSyncStatus('saving', 'Saving to Drive…');
-  const payload = 'CLUE_DATA_START' + JSON.stringify(state) + 'CLUE_DATA_END';
-  const encoded = encodeURIComponent(payload);
+  const encoded = encodeURIComponent(JSON.stringify(state));
   try {
-    const url = SCRIPT_URL + '?content=' + encoded + '&mode=overwrite&key=' + STORAGE_KEY;
-    await fetch(url);
+    await fetch(SCRIPT_URL + '?action=clueWrite&data=' + encoded);
     setSyncStatus('saved', 'Saved · ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
-    setSyncStatus('error', 'Save failed — stored locally');
+    setSyncStatus('saved', 'Saved locally · ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
@@ -576,7 +559,7 @@ async function init() {
   // Load local first for instant render
   loadFromLocal();
   render();
-  // Then try Drive (overwrites if found)
+  // Then load from Drive (overwrites local if found)
   await loadFromDrive();
   render();
 }
